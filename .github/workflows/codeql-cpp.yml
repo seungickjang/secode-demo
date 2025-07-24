@@ -59,13 +59,18 @@ jobs:
           name: codeql-sarif
           path: codeql-results/*.sarif
 
+      - name: Checkout with PAT
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WRITE_TOKEN }}
+
       - name: Commit SARIF file
-        env:
-          PAT_TOKEN: ${{ secrets.WRITE_TOKEN }}
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Action"
           git add codeql-results/*.sarif
-          git commit -m "CodeQL Results"
-          git push https://x-access-token:${{ secrets.WRITE_TOKEN }}@github.com/${{ github.repository }} HEAD:main
-        continue-on-error: true  # Avoid failure if nothing to commit
+          git diff --cached --quiet || git commit -m "CodeQL Results"
+          git push
+        env:
+          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+
