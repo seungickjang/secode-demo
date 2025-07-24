@@ -38,7 +38,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
-          setup-python-dependencies: false  # optional, skip extras
+          setup: true
 
       - name: Build the project 
         run: |
