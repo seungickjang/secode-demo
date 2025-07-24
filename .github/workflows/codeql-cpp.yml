@@ -46,18 +46,14 @@ jobs:
           make
           make check
 
-      - name: Run CodeQL Analysis
-        run: |
-          mkdir -p codeql-results
-          "$CODEQL_PATH/codeql" version
-          "$CODEQL_PATH/codeql" database create cpp-db --language=cpp --command="make clean && make"
-          "$CODEQL_PATH/codeql" database analyze cpp-db cpp-security-and-quality.qls \
-            --format=sarifv2.1.0 \
-            --output=codeql-results/results.sarif
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          output: codeql-results
 
-      - name: Upload SARIF
+      - name: Upload SARIF results as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: codeql-results
-          path: codeql-results/results.sarif
+          name: codeql-sarif
+          path: codeql-results/*.sarif
 
