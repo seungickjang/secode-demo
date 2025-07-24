@@ -1,2 +1,2 @@
-bin_PROGRAMS = helloworld
+bin_PROGRAMS = hello
 hello_SOURCES = main.cpp
