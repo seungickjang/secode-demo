@@ -66,6 +66,7 @@ jobs:
 
       - name: Commit SARIF file
         run: |
+          ls -al
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Action"
           git add codeql-results/*.zip
