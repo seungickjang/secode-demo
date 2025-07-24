@@ -3,8 +3,16 @@ name: CodeQL C++ Analysis
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'configure.ac'
+      - 'Makefile.am'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'configure.ac'
+      - 'Makefile.am'
 
 jobs:
   analyze:
@@ -29,13 +37,26 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
+          setup-python-dependencies: false  # optional, skip extras
 
-      - name: Manual build steps
+      - name: Build the project 
         run: |
           ./configure
           make
           make check
 
       - name: Run CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        # uses: github/codeql-action/analyze@v3
+        run: |
+          mkdir -p codeql-results
+          codeql database create cpp-db --language=cpp --command="make clean && make"
+          codeql database analyze cpp-db cpp-security-and-quality.qls \
+            --format=sarifv2.1.0 \
+            --output=codeql-results/results.sarif
+
+      - name: Upload SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results
+          path: codeql-results/results.sarif
 
