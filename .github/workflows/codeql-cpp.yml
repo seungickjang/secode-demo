@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WRITE_TOKEN }}
 
       - name: Install Autotools
         run: sudo apt-get update && sudo apt-get install -y autoconf automake libtool
@@ -58,11 +60,6 @@ jobs:
         with:
           name: codeql-sarif
           path: codeql-results/*.sarif
-
-      - name: Checkout with PAT
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.WRITE_TOKEN }}
 
       - name: Commit SARIF file
         run: |
