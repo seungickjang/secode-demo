@@ -47,11 +47,11 @@ jobs:
           make check
 
       - name: Run CodeQL Analysis
-        # uses: github/codeql-action/analyze@v3
         run: |
           mkdir -p codeql-results
-          codeql database create cpp-db --language=cpp --command="make clean && make"
-          codeql database analyze cpp-db cpp-security-and-quality.qls \
+          "$CODEQL_PATH/codeql" version
+          "$CODEQL_PATH/codeql" database create cpp-db --language=cpp --command="make clean && make"
+          "$CODEQL_PATH/codeql" database analyze cpp-db cpp-security-and-quality.qls \
             --format=sarifv2.1.0 \
             --output=codeql-results/results.sarif
 
