@@ -38,7 +38,6 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
-          setup: true
 
       - name: Build the project 
         run: |
