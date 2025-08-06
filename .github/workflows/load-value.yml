@@ -15,13 +15,11 @@ jobs:
       security-events: write
 
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - name: Restore cached value
+        uses: actions/cache@v4
         with:
-          name: saved-value
-      
-      - name: Show directory contents
-        run: ls -l
+          path: value.txt
+          key: shared-value-key
 
-      - name: Load the saved value
+      - name: Read value
         run: cat value.txt
