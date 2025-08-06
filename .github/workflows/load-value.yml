@@ -1,0 +1,27 @@
+name: Load Value
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  load-value: 
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: saved-value
+      
+      - name: Show directory contents
+        run: ls -l
+
+      - name: Load the saved value
+        run: cat value.txt
