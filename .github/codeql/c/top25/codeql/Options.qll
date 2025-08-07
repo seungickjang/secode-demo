@@ -8,7 +8,6 @@
  */
 
 import cpp
-import codeql.util.Options
 
 /**
  * Customizable predicates that specify information about
