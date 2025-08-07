@@ -55,21 +55,28 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           output: codeql-results
+          format: json
 
-      - name: Upload SARIF results as artifact
-        uses: actions/upload-artifact@v4
+      # - name: Upload SARIF results as artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: codeql-sarif
+      #     path: codeql-results/*.sarif
+
+      - name: Cache value.txt
+        uses: actions/cache@v4
         with:
-          name: codeql-sarif
-          path: codeql-results/*.sarif
+          path: codeql-results/cpp.json
+          key: codeql-results
 
-      - name: Commit SARIF file
-        run: |
-          ls -l codeql-results
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Action"
-          git add codeql-results
-          git diff --cached --quiet || git commit -m "CodeQL Results"
-          git push
-        env:
-          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+      # - name: Commit SARIF file
+      #   run: |
+      #     ls -l codeql-results
+      #     git config --local user.email "actions@github.com"
+      #     git config --local user.name "GitHub Action"
+      #     git add codeql-results
+      #     git diff --cached --quiet || git commit -m "CodeQL Results"
+      #     git push
+      #   env:
+      #     WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
 
