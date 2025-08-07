@@ -53,6 +53,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
+          queries: ./.github/codeql/c/top25
           output: codeql-results
 
       - name: Upload SARIF results as artifact
