@@ -1,4 +1,4 @@
-name: codeql/cpp-queries
+name: csiro/cpp-queries
 version: 0.9.11-dev
 groups:
   - cpp
