@@ -1,0 +1,39 @@
+name: Run SeCode Pipeline
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Install tools
+      #   run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # or "3.10", etc.
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas pycocoevalcap nltk transformers lexical-diversity torch textblob textstat
+      
+      - name: Restore cached sarif file
+        uses: actions/cache@v4
+        with:
+          path: codeql-results/cpp.sarif
+          key: codeql-results
+
+      - name: Set environment variables and run python
+        env:
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+        run: python .github/scripts/secode.py

@@ -62,20 +62,20 @@ jobs:
       #     name: codeql-sarif
       #     path: codeql-results/*.sarif
 
-      - name: Convert SARIF to JSON
-        run: |
-          jq '.' codeql-results/cpp.sarif > codeql-results/cpp.json
+      # - name: Convert SARIF to JSON
+      #   run: |
+      #     jq '.' codeql-results/cpp.sarif > codeql-results/cpp.json
 
       - name: Cache CodeQL results
         uses: actions/cache@v4
         with:
-          path: codeql-results/cpp.json
+          path: codeql-results/cpp.sarif
           key: codeql-results
       
-      - name: display SARIF results
-        run: |
-          echo "CodeQL results saved to codeql-results/cpp.json"
-          cat codeql-results/cpp.json
+      # - name: display SARIF results
+      #   run: |
+      #     echo "CodeQL results saved to codeql-results/cpp.json"
+      #     cat codeql-results/cpp.json
 
       # - name: Commit SARIF file
       #   run: |
