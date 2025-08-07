@@ -43,7 +43,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: cpp
-          queries: ./.github/codeql/c/top25
+          queries: ./.github/codeql/cpp/top25
 
       - name: Build the project 
         run: |
