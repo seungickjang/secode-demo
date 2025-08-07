@@ -10,7 +10,7 @@ import re
 import logging
 
 
-OPENAI_KEY = os.getenv["OPENAI_KEY"]
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 
 
 def extract_cwe_id(tags):
