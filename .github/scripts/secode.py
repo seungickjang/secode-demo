@@ -133,8 +133,7 @@ def format_cwe_ids(cwe_ids):
 def check_cwe(cwe_list, cwe_to_check):
     return cwe_to_check in cwe_list 
 
-
-def main():
+def vul_finder_codeQL():
     try:
         f = open('codeql-results/cpp.sarif', 'rt', encoding='utf-8')
         result = json.load(f)
@@ -143,6 +142,15 @@ def main():
         with open('codeql-results/cpp.json', 'wt', encoding='utf-8') as f:
             f.write(json.dumps(result))
             f.close()
+        
+        summarized_data = json_to_csv('codeql-results/cpp.json')
+        return formatresult(summarized_data)
 
     except Exception as e:
         logging.error("Failed to read SARIF file: %s", e.stderr.decode())
+        return "Status -100"
+    
+
+def main():
+    result = vul_finder_codeQL()
+    print(result)
