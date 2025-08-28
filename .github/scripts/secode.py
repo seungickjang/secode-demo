@@ -153,4 +153,8 @@ def vul_finder_codeQL():
 
 def main():
     result = vul_finder_codeQL()
-    print(result)
+    print('CodeQL Result:', result)
+
+
+if __name__ == "__main__":
+    main()
