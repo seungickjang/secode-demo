@@ -23,6 +23,35 @@ def extract_cwe_id(tags):
     return 'No CWE-ID available'
 
 
+def evaluator_score(text):
+    # Regular expression pattern to find the desired substring followed by a number
+    pattern = r"Score: (-?\d+)"
+    
+    # Search for the pattern in the provided text
+    match = re.search(pattern, text)
+    
+    if match:
+        #print(match)
+        # Extract the number from the matched pattern
+        return int(match.group(1))
+    else:
+        return 0
+    
+def fixer_score(text):
+    # Regular expression pattern to find the desired substring followed by a number
+    pattern = r"d\) Updated SCORE: (-?\d+)"
+    
+    
+    # Search for the pattern in the provided text
+    match = re.search(pattern, text)
+    
+    if match:
+        # Extract the number from the matched pattern
+        return int(match.group(1))
+    else:
+        
+        return 0  
+
 def process_json_file(json_file_path):
     # Load SARIF file
     with open(json_file_path, 'r') as file:
@@ -151,9 +180,145 @@ def vul_finder_codeQL():
         return "Status -100"
     
 
+def get_orginal_code():
+    """ Read all source code from /src directory and return as a single string. Each file is separated by a comment indicating the file name. """
+    code = ""
+    for root, dirs, files in os.walk("src"):
+        for file in files:
+            if file.endswith(('.c', '.cpp', '.h', '.hpp')):
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+                    code += f"// File: {file}\n{file_content}\n\n"
+    return code
+
+
+def sec_code_for_loop(fixed_code,CWE_found,messages, index, score, model,lang,max_loop=10,temp=0):
+    #previous_session_history = ''
+    old_fixed_code=fixed_code
+    #previous_vulnerability_report = "iteration 0 found vulnerability report: " + found_vulnerabilities(session_history)
+    #previous_fixed_vulnerabilities = ''
+    patched=0
+    for i in range(max_loop):
+#         print("Entered Loop ", i, "with vulnerable finder score ", score)
+        newfixed_code=''
+        tries=0
+        while newfixed_code=='' and tries<5:
+            fixed_code_format,  messages = patcher(messages,lang, score,model,temp)
+            print(fixed_code_format)
+            newfixed_code = extract_code(fixed_code_format,lang)
+            print("tries ",tries)
+            tries+=1
+            
+        fixed_code=newfixed_code
+        fixed_score = fixer_score(fixed_code_format)
+        list_fixed_vulnerabilities = extract_fixed_vulnerabilities(fixed_code_format)
+        score = fixed_score
+        
+        if(fixed_code!=''):
+            old_fixed_code=fixed_code
+        else:
+            fixed_code=old_fixed_code
+       # print("############### FIXED CODE IS #####################\n",fixed_code_format)
+        messages.append({"role": "assistant", "content":fixed_code})
+        
+        
+        vulnerability_report, messages = vul_finder(messages,lang,model)
+        #print("New vul Report ",vulnerability_report)
+        messages.append({"role": "assistant", "content":vulnerability_report})
+        CWE=extract_cwe_ids(vulnerability_report)
+        maxKey=int(max(list(CWE_found.keys())))# Get old loop
+        print("CWEs Found ",CWE_found.values())
+        
+        #print("new vul report\n",vulnerability_report)
+        CWE_found[str(maxKey+1)]=CWE
+        #print(f"In loop ${i + 1} of sec_for: ", messages)
+        
+       
+        if "no vulnerabilities" in vulnerability_report.lower() or "vulnerable: no" in vulnerability_report.lower() or "n/a" in vulnerability_report.lower():
+#             print("not vulnerable\n")
+            #previous_session_history+="\n Result Fixed"
+            patched=1
+            model_fixed_code=fixed_code
+            fixed_code, messages = compilable(fixed_code,lang)
+            fixed_code=extract_code(fixed_code,lang)
+            if(fixed_code==''):
+                fixed_code=model_fixed_code
+            return i+1, fixed_code, score,messages,patched
+ 
+        else:
+            eval_score = evaluator_score(vulnerability_report)
+            new_report = found_vulnerabilities(vulnerability_report)
+            #session_history ="In this code:\n"+fixed_code+"\n These security vulnerabilities were found:"+ new_report+ "previous history of vulnerabilities found include, "+previous_vulnerability_report+ "previous history of vulnerabilities fixed include, "+previous_fixed_vulnerabilities
+            score = eval_score
+    
+    model_fixed_code=fixed_code
+    fixed_code, messages = compilable(fixed_code,lang)
+    fixed_code=extract_code(fixed_code,lang)
+    if(fixed_code==''):
+          fixed_code=model_fixed_code
+    return i+1, fixed_code, score,messages,patched
+    
+
 def main():
-    result = vul_finder_codeQL()
-    print('CodeQL Result:', result)
+    codeql_report = vul_finder_codeQL()
+    print("\nCode QL vul_finder: ", codeql_report)
+
+    messages = []
+    CWE_found={}
+    CWE_found_CodeQL={}
+    additional_tries=0
+    codeql_vul='Yes'
+    decision_codeql=''
+    decision_our='Initial code is vulnerable'
+    limit=5
+    temp=0.0
+
+    original_code = get_orginal_code()
+    fixed_code=original_code
+
+    print("Original Code: \n", original_code)
+    
+    '''
+    if('status' not in codeql_report.lower()):
+        CWE=extract_cwe_ids(codeql_report)
+
+        #END VUL REPORT
+        CWE_found_CodeQL[str(additional_tries+1)]=CWE
+
+    if "no vulnerabilities" in codeql_report.lower() or "vulnerable: no" in codeql_report.lower():
+        codeql_vul='No'
+        decision_codeql="not vulnerable"
+        pass
+    else:
+        if "status" in codeql_report.lower():
+            codeql_vul='Error'
+            decision_codeql="can't compile"
+            message="The code is not compilable, complete it and make it runnable without errors , make sure all required header files are included. Correct the brackets and identation\n"
+        else:
+            message="The code is still vulnerable. Here is the CodeQL report\n"
+        patched=0
+        score=evaluator_score(codeql_report)
+        messages.append({"role": "user", "content":fixed_code})
+        messages.append({"role": "assistant", "content":message+codeql_report})
+        if(additional_tries>=limit):
+            temp+=0.1
+            pass
+        loop_count, fixed_code, score,messages,patched=sec_code_for_loop(fixed_code,CWE_found,messages,index,score,model,lang,tries,temp)
+
+        # Simulate a process by adding a delay (e.g., using sleep)
+        loop_count+=previous_loop_count
+        additional_tries+=1
+        # Determine decision_our based on patch status and codeql findings
+        if patched == 0 :
+            decision_our += ", Remains not fixed by llm even after CodeQL"
+        elif patched==1:
+            decision_our+= ", Fixed by llm after CodeQL"
+    '''
+
+    print(codeql_vul)
+    print("Decision CodeQL: ",decision_codeql)
+    print("Decision Our: ",decision_our)   
 
 
 if __name__ == "__main__":
