@@ -60,6 +60,12 @@ jobs:
           # fail the step if any failed
           [ $c1 -eq 0 ] && [ $c2 -eq 0 ] && [ $c3 -eq 0 ]
 
+      - name: Check compile
+        if: steps.compile.outputs.ok == 'false'
+        run: |
+          echo "Compile failed. ❌ Needs manual review."
+          exit 1
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
@@ -115,7 +121,3 @@ jobs:
         if: steps.sarifcount.outputs.count == '0'
         run: echo "No CodeQL alerts. ✅ Secure."
 
-      - name: Compile failed -> Exit
-        if: steps.compile.outputs.ok == 'false'
-        run: echo "Compile failed. ❌ Needs manual review."
-      
