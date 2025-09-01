@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"  # or "3.10", etc.
+          python-version: "3.9"  # or "3.10", etc.
 
       - name: Install dependencies
         run: |
@@ -33,7 +33,19 @@ jobs:
           path: codeql-results/cpp.sarif
           key: codeql-results
 
+      - name: Restore cached value
+        uses: actions/cache@v4
+        with:
+          path: pipeline.json
+          key: shared-value-key
+
       - name: Set environment variables and run python
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
         run: python .github/scripts/secode.py
+
+      - name: Cache value.txt
+        uses: actions/cache@v4
+        with:
+          path: pipeline.json
+          key: shared-value-key
