@@ -46,10 +46,19 @@ jobs:
           queries: ./.github/codeql/cpp/top25
 
       - name: Build the project 
+        id: compile
         run: |
-          ./configure
-          make
-          make check
+          set +e
+          ./configure; c1=$?
+          make; c2=$?
+          make check; c3=$?
+          set -e
+
+          # expose outputs
+          echo "ok=$([ $c1 -eq 0 ] && [ $c2 -eq 0 ] && [ $c3 -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+          # fail the step if any failed
+          [ $c1 -eq 0 ] && [ $c2 -eq 0 ] && [ $c3 -eq 0 ]
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -105,4 +114,8 @@ jobs:
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
         run: echo "No CodeQL alerts. ✅ Secure."
+
+      - name: Compile failed -> Exit
+        if: steps.compile.outputs.ok == 'false'
+        run: echo "Compile failed. ❌ Needs manual review."
       
