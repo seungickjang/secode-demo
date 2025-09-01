@@ -88,3 +88,21 @@ jobs:
       #   env:
       #     WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
 
+      
+      # --- Count alerts ---
+      - name: Count CodeQL results
+        id: sarifcount
+        run: |
+          total=0
+          for f in codeql-results/*.sarif; do
+            [ -f "$f" ] || continue
+            c=$(jq '[.runs[].results] | flatten | length' "$f")
+            total=$(( total + c ))
+          done
+          echo "count=$total" >> "$GITHUB_OUTPUT"
+          echo "Found $total issues."
+
+      - name: Secure -> Exit
+        if: steps.sarifcount.outputs.count == '0'
+        run: echo "No CodeQL alerts. ✅ Secure."
+      
