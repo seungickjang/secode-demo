@@ -68,8 +68,8 @@ jobs:
         run: echo "No CodeQL alerts. ✅ Secure."
 
   run-secode-pipeline:
-    if: needs.analyze.outputs.count != '0'
     needs: analyze
+    if: fromJson(needs.analyze.outputs.count) > 0
     uses: ./.github/workflows/secode-pipeline.yml
     with:
       language: "python"
