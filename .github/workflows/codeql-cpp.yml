@@ -48,20 +48,20 @@ jobs:
       - name: Build the project 
         id: compile
         run: |
-          ./configure;
-          make;
-          make check;
+          ./configure
+          make
+          make check
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           output: codeql-results
 
-      # - name: Upload SARIF results as artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: codeql-sarif
-      #     path: codeql-results/*.sarif
+      - name: Upload SARIF results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif
+          path: codeql-results/*.sarif
 
       # - name: Convert SARIF to JSON
       #   run: |
@@ -78,16 +78,16 @@ jobs:
       #     echo "CodeQL results saved to codeql-results/cpp.json"
       #     cat codeql-results/cpp.json
 
-      - name: Commit SARIF file
-        run: |
-          ls -l codeql-results
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Action"
-          git add codeql-results
-          git diff --cached --quiet || git commit -m "CodeQL Results"
-          git push
-        env:
-          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+      # - name: Commit SARIF file
+      #   run: |
+      #     ls -l codeql-results
+      #     git config --local user.email "actions@github.com"
+      #     git config --local user.name "GitHub Action"
+      #     git add codeql-results
+      #     git diff --cached --quiet || git commit -m "CodeQL Results"
+      #     git push
+      #   env:
+      #     WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
 
       
       # --- Count alerts ---
