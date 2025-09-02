@@ -102,7 +102,7 @@ jobs:
             total=$(( total + c ))
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
-          echo "Found $total issues."
+          echo "❌ Found $total issues."
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'

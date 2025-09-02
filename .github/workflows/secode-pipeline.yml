@@ -1,6 +1,12 @@
 name: Run SeCode Pipeline
 
 on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+        default: "cpp"
   workflow_dispatch:
 
 permissions:
@@ -30,7 +36,7 @@ jobs:
       - name: Restore cached sarif file
         uses: actions/cache@v4
         with:
-          path: codeql-results/cpp.sarif
+          path: codeql-results/${inputs.language}.sarif
           key: codeql-results
 
       - name: Restore cached value
@@ -42,7 +48,7 @@ jobs:
       - name: Set environment variables and run python
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
-        run: python .github/scripts/secode.py
+        run: python .github/scripts/secode.py -l ${{ inputs.language }}
 
       - name: Cache value.txt
         uses: actions/cache@v4

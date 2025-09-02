@@ -63,9 +63,13 @@ jobs:
             total=$(( total + c ))
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
-          echo "❗Found $total issues."
+          echo "❌ Found $total issues."
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
         run: echo "No CodeQL alerts. ✅ Secure."
 
+      - name: Run SeCode Pipeline
+        uses: ./.github/workflows/secode-pipeline.yml
+        with:
+          language: "python"
