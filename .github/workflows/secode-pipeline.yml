@@ -64,3 +64,22 @@ jobs:
         with:
           path: pipeline.json
           key: shared-value-key
+
+      - name: Commit and push main.py to secode-patched
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Action"
+
+          git fetch origin
+
+          # If remote branch exists, track it; otherwise create from current HEAD
+          if git ls-remote --exit-code --heads origin secode-patched >/dev/null 2>&1; then
+            git switch -c secode-patched --track origin/secode-patched 2>/dev/null || git switch secode-patched
+            git pull --ff-only
+          else
+            git switch -c secode-patched
+          fi
+
+          git add src/main.py
+          git commit -m "SeCode patched" || echo "No changes to commit."
+          git push -u origin secode-patched

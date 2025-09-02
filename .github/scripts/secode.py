@@ -678,10 +678,13 @@ def main(language):
     else:
         upsert_tries_and_patched(0, True)
 
+        with open(f"src/main.{language if language!='cpp' else 'py'}", "w", encoding="utf-8") as f:
+            f.write(fixed_code)
+            f.close()  
+
     print(codeql_vul)
     print("Decision CodeQL: ", decision_codeql)
     print("Decision Our: ", decision_our)
-    print(fixed_code)
 
 
 if __name__ == "__main__":
