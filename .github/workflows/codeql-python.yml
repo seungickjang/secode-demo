@@ -71,6 +71,9 @@ jobs:
 
 
   run-secode-pipeline:
+    needs: analyze
+    if: needs.analyze.outputs.count != '0'
     uses: ./.github/workflows/secode-pipeline.yml
     with:
       language: "python"
+    secrets: inherit
