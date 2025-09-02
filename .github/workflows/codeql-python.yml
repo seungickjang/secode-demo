@@ -32,13 +32,13 @@ jobs:
           token: ${{ secrets.WRITE_TOKEN }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: python
-          tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-20221024/codeql-bundle-linux64.tar.gz
+          tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.16.6/codeql-bundle-linux64.tar.gz
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         with:
           output: codeql-results
 
