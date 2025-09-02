@@ -48,23 +48,9 @@ jobs:
       - name: Build the project 
         id: compile
         run: |
-          set +e
-          ./configure; c1=$?
-          make; c2=$?
-          make check; c3=$?
-          set -e
-
-          # expose outputs
-          echo "ok=$([ $c1 -eq 0 ] && [ $c2 -eq 0 ] && [ $c3 -eq 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-
-          # fail the step if any failed
-          [ $c1 -eq 0 ] && [ $c2 -eq 0 ] && [ $c3 -eq 0 ]
-
-      - name: Check compile
-        if: steps.compile.outputs.ok == 'false'
-        run: |
-          echo "Compile failed. ❌ Needs manual review."
-          exit 1
+          ./configure;
+          make;
+          make check;
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -108,6 +94,7 @@ jobs:
       - name: Count CodeQL results
         id: sarifcount
         run: |
+          cat codeql-results/cpp.sarif
           total=0
           for f in codeql-results/*.sarif; do
             [ -f "$f" ] || continue
