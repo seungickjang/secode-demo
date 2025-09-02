@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #define BUFSIZER1 512
 #define BUFSIZER2 ((BUFSIZER1/2) - 8)
