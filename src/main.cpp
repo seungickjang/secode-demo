@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 
     // CWE-377: Insecure temporary file creation
     char tmpl[] = "/tmp/myappXXXXXX";
-    char* tmp = std::mktemp(tmpl);              // predictable name
+    char* tmp = ::mktemp(tmpl);                 // NOTE: global namespace
     if (tmp) {
         FILE* tf = std::fopen(tmp, "w+");       // race/overwrite risk
         if (tf) {
@@ -49,9 +49,9 @@ int main(int argc, char* argv[]) {
     // CWE-78: OS command injection
     char cmd[128];
     std::snprintf(cmd, sizeof(cmd), "ls %s", argv[3]); // unvalidated arg flows to shell
-    std::system(cmd);
+    int sys_rc = std::system(cmd); (void)sys_rc;       // avoid -Wunused-result
 
-    std::printf("Hello, %s\n", name); // keep 'name' live
+    std::printf("Hello, %s\n", name);
     return 0;
 }
 
