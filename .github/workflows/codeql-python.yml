@@ -37,7 +37,7 @@ jobs:
           languages: python
           tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.16.6/codeql-bundle-linux64.tar.gz
           config-file: ./.github/codeql/codeql-config.yml
-          #queries: +./.github/codeql/python/top25
+          queries: ./.github/codeql/python/top25
 
       - name: Codeql autobuild
         uses: github/codeql-action/autobuild@v3.30.0
@@ -46,6 +46,7 @@ jobs:
         uses: github/codeql-action/analyze@v3.30.0
         with:
           output: codeql-results
+          queries: ./.github/codeql/python/top25
 
       - name: Upload SARIF results as artifact
         uses: actions/upload-artifact@v4
