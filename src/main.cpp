@@ -1,14 +1,16 @@
 #include <iostream>
-#include <climits>
+#include <cstring> // For strcpy
 
 int main() {
-    int a = INT_MAX;   //  2147483647 on most 32-bit int systems
-    int b = 1;
+    char buffer[10]; // A buffer designed to hold 9 characters + null terminator
+    char input[] = "This is a very long string that will overflow the buffer.";
 
-    // VULNERABLE: CWE-190 — signed integer overflow (undefined behavior)
-    int c = a + b;
+    // This operation attempts to copy a string larger than 'buffer' can hold,
+    // leading to a buffer overflow.
+    strcpy(buffer, input); 
 
-    std::cout << "a=" << a << ", b=" << b << ", a+b=" << c << '\n';
+    std::cout << "Buffer content: " << buffer << std::endl;
+
     return 0;
 }
 
