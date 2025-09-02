@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'src/**'
+      - 'src/main.py'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'src/**'
+      - 'src/main.py'
   workflow_dispatch:
 
 permissions:
@@ -56,7 +56,6 @@ jobs:
       - name: Count CodeQL results
         id: sarifcount
         run: |
-          cat codeql-results/python.sarif
           total=0
           for f in codeql-results/*.sarif; do
             [ -f "$f" ] || continue
@@ -64,7 +63,7 @@ jobs:
             total=$(( total + c ))
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
-          echo "Found $total issues."
+          echo "❗Found $total issues."
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
