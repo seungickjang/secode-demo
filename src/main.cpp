@@ -1,5 +1,6 @@
 
 /* CWE 416 */
+#include <cstdlib>
 #include <stdio.h>
 #include <unistd.h>
 
