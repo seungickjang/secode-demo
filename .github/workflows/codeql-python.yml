@@ -22,6 +22,8 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    outputs:
+      count: ${{ steps.sarifcount.outputs.count }}
 
     steps:
       - name: Checkout repository
@@ -62,7 +64,7 @@ jobs:
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
       
-      - name: Inecure
+      - name: Insecure
         if: steps.sarifcount.outputs.count != '0'
         run: echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
 
