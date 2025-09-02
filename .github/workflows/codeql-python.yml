@@ -69,7 +69,8 @@ jobs:
         if: steps.sarifcount.outputs.count == '0'
         run: echo "No CodeQL alerts. ✅ Secure."
 
-      - name: Run SeCode Pipeline
-        uses: ./.github/workflows/secode-pipeline.yml
-        with:
-          language: "python"
+
+  run-secode-pipeline:
+    uses: ./.github/workflows/secode-pipeline.yml
+    with:
+      language: "python"
