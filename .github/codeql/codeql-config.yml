@@ -1,0 +1,12 @@
+name: "Python Top25"
+disable-default-queries: true
+
+# Add built-in suites, local queries/dirs/suites, or published packs
+queries:
+  - uses: security-extended
+  - uses: ./.github/codeql/python/top25
+
+# Optional: filter queries by id/severity/etc.
+# query-filters:
+#  - exclude:
+#      id: js/unsafe-html-constructed-from-input
