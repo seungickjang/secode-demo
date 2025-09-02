@@ -6,7 +6,7 @@ on:
       language:
         required: true
         type: string
-        default: "cpp"
+        default: "python"
   workflow_dispatch:
 
 permissions:
@@ -36,7 +36,7 @@ jobs:
       - name: Restore cached sarif file
         uses: actions/cache@v4
         with:
-          path: codeql-results/${inputs.language}.sarif
+          path: codeql-results/${{ inputs.language }}.sarif
           key: codeql-results
 
       - name: Restore cached value
