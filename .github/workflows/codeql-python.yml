@@ -61,7 +61,10 @@ jobs:
             total=$(( total + c ))
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
-          echo "❌ Found $total issues."
+      
+      - name: Inecure
+        if: steps.sarifcount.outputs.count != '0'
+        run: echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
