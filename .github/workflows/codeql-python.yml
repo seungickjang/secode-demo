@@ -51,8 +51,6 @@ jobs:
           path: codeql-results/python.sarif
           key: codeql-results
       
-      
-      # --- Count alerts ---
       - name: Count CodeQL results
         id: sarifcount
         run: |
@@ -69,10 +67,9 @@ jobs:
         if: steps.sarifcount.outputs.count == '0'
         run: echo "No CodeQL alerts. ✅ Secure."
 
-
   run-secode-pipeline:
+    if: needs.analyze.outputs.count != '0'
     needs: analyze
-    if: needs.analyze.steps.sarifcount.outputs.count != '0'
     uses: ./.github/workflows/secode-pipeline.yml
     with:
       language: "python"
