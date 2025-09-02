@@ -8,6 +8,15 @@ on:
         type: string
         default: "python"
   workflow_dispatch:
+    inputs:
+      language:
+        description: 'Programming language (python or cpp)'
+        required: true
+        default: 'python'
+        type: choice
+        options:
+        - python
+        - cpp
 
 permissions:
   contents: write
