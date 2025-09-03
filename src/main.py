@@ -1,14 +1,11 @@
-from flask import Flask, request
-from html import escape
+import html
 
-app = Flask(__name__)
+def process_user_input(user_input):
+    # Process the user input here
+    result = user_input  # Example processing
+    return html.escape(str(result))  # Escape the output to prevent XSS
 
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    # Assume input is coming from a JSON body
-    data = request.get_json()
-    result = data.get('value', 0)  # Default to 0 if 'value' is not provided
-    return escape(str(result))  # Escape the output to prevent XSS
-
-if __name__ == '__main__':
-    app.run()
+# Example usage
+if __name__ == "__main__":
+    user_input = "<script>alert('XSS');</script>"  # Simulated user input
+    print(process_user_input(user_input))
