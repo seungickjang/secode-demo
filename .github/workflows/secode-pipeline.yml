@@ -93,6 +93,9 @@ jobs:
             git switch -c secode-patched
           fi
 
+          # Overwrite conflict file with the stashed version
+          git show stash@{0}:src/main.py > src/main.py
+
           # Bring your edits onto this branch
           git stash pop   # resolve any conflicts if prompted (git status will show them)
 
