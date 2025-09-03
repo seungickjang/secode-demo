@@ -1,34 +1,14 @@
 from flask import Flask, request
-import math
+from html import escape
 
 app = Flask(__name__)
-@app.route('/compute', methods=['GET'])
-def compute():
-    try:
-        num1 = float(request.args.get('num1'))
-        num2 = float(request.args.get('num2'))
-        result = 1 / (num1 + num2)
-        return {'result': result}
-    except Exception as e:
-        return {'error': str(e)}
-if __name__ == '__main__':
-    app.run(debug=True)
 
-''' Original Code
-from flask import Flask, request
-import math
-
-app = Flask(__name__)
-@app.route('/compute', methods=['GET'])
-def compute():
-    try:
-        num1 = float(request.args.get('num1'))
-        num2 = float(request.args.get('num2'))
-        result = 1 / (num1 + num2)
-        return {'result': result}
-    except Exception as e:
-        return {'error': str(e)}
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    # Assume input is coming from a JSON body
+    data = request.get_json()
+    result = data.get('value', 0)  # Default to 0 if 'value' is not provided
+    return escape(str(result))  # Escape the output to prevent XSS
 
 if __name__ == '__main__':
-    app.run(debug=True)
-'''
+    app.run()
