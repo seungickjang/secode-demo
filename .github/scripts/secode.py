@@ -9,6 +9,7 @@ import csv
 import re
 import logging
 from pathlib import Path
+import traceback
 
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
@@ -231,15 +232,15 @@ def process_json_file(json_file_path):
 
     # Process each run in the SARIF file
     for run in sarif_data.get("runs", []):
-        rules = {
-            rule["id"]: {
-                "description": rule.get("shortDescription", {}).get(
-                    "text", "No description available"
-                ),
+        rules = {}
+        extensions = run.get("tool", {}).get("extensions", []) or []
+
+        # only use the first extension
+        for rule in extensions[0].get("rules", []) or []:
+            rules[rule.get("id")] = {
+                "description": rule.get("shortDescription", {}).get("text", "No description available"),
                 "cwe": extract_cwe_id(rule.get("properties", {}).get("tags", [])),
             }
-            for rule in run.get("tool", {}).get("driver", {}).get("rules", [])
-        }
 
         for result in run.get("results", []):
             rule_id = result.get("ruleId")
@@ -373,6 +374,7 @@ def vul_finder_codeQL(language):
         return formatresult(summarized_data)
 
     except Exception as e:
+        traceback.print_exc()
         logging.error("Failed to read SARIF file: %s", e)
         return "Status -100"
 
@@ -678,7 +680,7 @@ def main(language):
     else:
         upsert_tries_and_patched(0, True)
 
-        with open(f"src/main.{language if language!='cpp' else 'py'}", "w", encoding="utf-8") as f:
+        with open(f"src/main.{language if language=='cpp' else 'py'}", "w", encoding="utf-8") as f:
             f.write(fixed_code)
             f.close()  
 
