@@ -57,9 +57,18 @@ jobs:
       - name: Set environment variables and run python
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
-        run: python .github/scripts/secode.py -l ${{ inputs.language }}
+        run: |
+          python .github/scripts/secode.py -l ${{ inputs.language }}
+          cat "== SeCode Pipeline Results =="
+          cat pipeline.json
 
-      - name: Cache value.txt
+      - name: Upload pipeline.json as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-json
+          path: pipeline.json
+
+      - name: Cache pipeline.json
         uses: actions/cache@v4
         with:
           path: pipeline.json
