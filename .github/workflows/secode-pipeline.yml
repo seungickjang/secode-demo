@@ -79,16 +79,24 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
+          git stash push -u -m "Move changes to secode-patched"
+
+          # Get the latest refs from origin
           git fetch origin
 
-          # If remote branch exists, track it; otherwise create from current HEAD
-          if git ls-remote --exit-code --heads origin secode-patched >/dev/null 2>&1; then
-            git switch -c secode-patched --track origin/secode-patched 2>/dev/null || git switch secode-patched
-            git pull --ff-only
+          # Switch to secode-patched (create or track it as needed)
+          if git show-ref --verify --quiet refs/heads/secode-patched; then
+            git switch secode-patched
+          elif git ls-remote --exit-code --heads origin secode-patched >/dev/null 2>&1; then
+            git switch -t origin/secode-patched
           else
             git switch -c secode-patched
           fi
 
+          # Bring your edits onto this branch
+          git stash pop   # resolve any conflicts if prompted (git status will show them)
+
+          # Commit and push
           git add src/main.py
           git commit -m "SeCode patched" || echo "No changes to commit."
           git push -u origin secode-patched
