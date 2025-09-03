@@ -79,8 +79,6 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
-          git stash push -u -m "Move changes to secode-patched"
-
           # Get the latest refs from origin
           git fetch origin
 
@@ -93,11 +91,7 @@ jobs:
             git switch -c secode-patched
           fi
 
-          # Overwrite conflict file with the stashed version
-          git show stash@{0}:src/main.py > src/main.py
-
-          # Bring your edits onto this branch
-          git stash pop   # resolve any conflicts if prompted (git status will show them)
+          cp .main.py src/main.py
 
           # Commit and push
           git add src/main.py

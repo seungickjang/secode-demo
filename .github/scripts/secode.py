@@ -680,7 +680,7 @@ def main(language):
     else:
         upsert_tries_and_patched(0, True)
 
-        with open(f"src/main.{language if language=='cpp' else 'py'}", "w", encoding="utf-8") as f:
+        with open(f".main.{language if language=='cpp' else 'py'}", "w", encoding="utf-8") as f:
             f.write(fixed_code)
             f.close()  
 
