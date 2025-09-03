@@ -59,7 +59,7 @@ jobs:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
         run: |
           python .github/scripts/secode.py -l ${{ inputs.language }}
-          cat "== SeCode Pipeline Results =="
+          echo "== SeCode Pipeline Results =="
           cat pipeline.json
 
       - name: Upload pipeline.json as artifact
