@@ -87,6 +87,7 @@ jobs:
             echo "patched=false" >> $GITHUB_OUTPUT
             exit 0
           fi
+          cat pipeline.json
           patched=$(jq -r '.patched // false' pipeline.json)
           echo "patched=${patched}" >> $GITHUB_OUTPUT
 
@@ -94,7 +95,7 @@ jobs:
         if: steps.read.outputs.patched == 'true'
         run: |
           echo ${{ steps.read.outputs.patched }}
-          
+
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
