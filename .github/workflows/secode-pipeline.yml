@@ -40,7 +40,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install openai pandas pycocoevalcap nltk transformers lexical-diversity torch textblob textstat
+          pip install openai pandas pycocoevalcap nltk transformers lexical-diversity torch textblob textstat gh
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.WRITE_TOKEN }}" | gh auth login --with-token
       
       - name: Restore cached sarif file
         uses: actions/cache@v4
@@ -97,3 +100,5 @@ jobs:
           git add src/main.py
           git commit -m "SeCode patched" || echo "No changes to commit."
           git push -u origin secode-patched
+
+          gh pr create --title "Pull Request from SeCode" --body "This Pull Request was created by SeCode GitHub Action"
