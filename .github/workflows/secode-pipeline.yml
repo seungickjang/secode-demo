@@ -93,6 +93,8 @@ jobs:
       - name: Commit and push main.py to secode-patched
         if: steps.read.outputs.patched == 'true'
         run: |
+          echo ${{ steps.read.outputs.patched }}
+          
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
