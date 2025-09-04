@@ -608,6 +608,9 @@ def sec_code_for_loop(
 
 
 def main(language):
+    upsert_tries_and_patched(1, False)
+    return
+
     codeql_report = vul_finder_codeQL(language=language)
     print("\nCode QL vul_finder: ", codeql_report)
 
@@ -675,7 +678,7 @@ def main(language):
         elif patched == 1:
             decision_our += ", Fixed by llm after CodeQL"
     
-    if False: #patched == 0:
+    if patched == 0:
         upsert_tries_and_patched(additional_tries, False)
     else:
         upsert_tries_and_patched(additional_tries, True)
