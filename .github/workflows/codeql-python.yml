@@ -64,9 +64,18 @@ jobs:
           done
           echo "count=$total" >> "$GITHUB_OUTPUT"
       
-      - name: Insecure
+      - name: Insecure -> Create pipeline.json and run SeCode Pipeline
         if: steps.sarifcount.outputs.count != '0'
-        run: echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
+        run: |
+          echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
+          echo '{"tries": 0, "patched": false}' > pipeline.json
+
+      - name: Cache pipeline.json
+        uses: actions/cache@v4
+        if: steps.sarifcount.outputs.count != '0'
+        with:
+          path: pipeline.json
+          key: shared-value-key
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'

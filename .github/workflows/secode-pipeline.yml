@@ -44,7 +44,7 @@ jobs:
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh
-        
+
       - name: Authenticate GitHub CLI
         run: echo ${{ secrets.WRITE_TOKEN }} | gh auth login --with-token
       
@@ -80,7 +80,18 @@ jobs:
           path: pipeline.json
           key: shared-value-key
 
+      - name: Read patched flag
+        id: read
+        run: |
+          if [ ! -f pipeline.json ]; then
+            echo "patched=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          patched=$(jq -r '.patched // false' pipeline.json)
+          echo "patched=${patched}" >> $GITHUB_OUTPUT
+
       - name: Commit and push main.py to secode-patched
+        if: steps.read.outputs.patched == 'true'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
