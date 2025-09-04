@@ -675,10 +675,10 @@ def main(language):
         elif patched == 1:
             decision_our += ", Fixed by llm after CodeQL"
     
-    if patched == 0:
+    if False: #patched == 0:
         upsert_tries_and_patched(additional_tries, False)
     else:
-        upsert_tries_and_patched(0, True)
+        upsert_tries_and_patched(additional_tries, True)
 
         with open(f".main.{language if language=='cpp' else 'py'}", "w", encoding="utf-8") as f:
             f.write(fixed_code)
