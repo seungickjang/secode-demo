@@ -116,7 +116,9 @@ jobs:
           git commit -m "SeCode patched" || echo "No changes to commit."
           git push -u origin secode-patched
 
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          gh pr create --title "Pull Request from SeCode ($TIMESTAMP)" --body "This Pull Request was created by SeCode GitHub Action"
+          gh pr create \
+            --base main --head secode-patched \
+            --title "Pull Request from SeCode ($TIMESTAMP)" \
+            --body "This Pull Request was created by SeCode GitHub Action on $TIMESTAMP"
 
           git stash pop || echo "No stash to pop."
