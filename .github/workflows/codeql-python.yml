@@ -47,12 +47,6 @@ jobs:
           name: codeql-sarif
           path: codeql-results/*.sarif
 
-      - name: Cache CodeQL results
-        uses: actions/cache@v4
-        with:
-          path: codeql-results/python.sarif
-          key: codeql-results
-      
       - name: Count CodeQL results
         id: sarifcount
         run: |
@@ -70,12 +64,12 @@ jobs:
           echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
           echo '{"tries": 0, "patched": false}' > pipeline.json
 
-      - name: Cache pipeline.json
-        uses: actions/cache@v4
+      - name: Upload pipeline.json
+        uses: actions/upload-artifact@v4
         if: steps.sarifcount.outputs.count != '0'
         with:
+          name: pipeline-json
           path: pipeline.json
-          key: shared-value-key
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
