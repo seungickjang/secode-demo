@@ -116,9 +116,29 @@ jobs:
           git commit -m "SeCode patched" || echo "No changes to commit."
           git push -u origin secode-patched
 
-          gh pr create \
-            --base main --head secode-patched \
-            --title "Pull Request from SeCode ($TIMESTAMP)" \
-            --body "This Pull Request was created by SeCode GitHub Action on $TIMESTAMP"
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          create_pr() {
+            gh pr create --title "Pull Request from SeCode ($TIMESTAMP)" --body "This Pull Request was created by SeCode GitHub Action on "
+          }
+
+          if create_pr; then
+            echo "Pull request created successfully."
+            exit 0
+          fi
+
+          echo "PR create failed. Checking for an existing open PR from $HEAD -> $BASE ..."
+          EXISTING_PR="$(gh pr list --state open --base "$BASE" --head "$HEAD" --json number --jq '.[0].number' || true)"
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Closing existing PR #$EXISTING_PR ..."
+            gh pr close "$EXISTING_PR" --comment "Auto-closed by SeCode at $TIMESTAMP"
+          else
+            echo "No open PR found to close."
+          fi
+
+          # Try to create again from the same head
+          if create_pr; then
+            echo "PR created after closing the old one."
+            exit 0
+          fi
 
           git stash pop || echo "No stash to pop."
