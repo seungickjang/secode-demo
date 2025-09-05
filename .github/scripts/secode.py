@@ -278,6 +278,9 @@ def process_json_file(json_file_path):
     summarized_data = []
 
     for filename, data in file_cwe_map.items():
+        for cwe in data["cwes"]:
+            print(f"❌ Found CWE-{cwe}")
+
         summarized_data.append(
             {
                 "filename": filename,
@@ -610,7 +613,7 @@ def sec_code_for_loop(
 def main(language):
     # upsert_tries_and_patched(1, False)
     # return
-    
+
     codeql_report = vul_finder_codeQL(language=language)
     print("\nCode QL vul_finder: ", codeql_report)
 
