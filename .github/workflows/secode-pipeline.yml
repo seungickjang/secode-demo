@@ -93,6 +93,8 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
+          git stash -u || echo "No changes to stash."
+
           # Get the latest refs from origin
           git fetch origin
 
@@ -113,3 +115,5 @@ jobs:
           git push -u origin secode-patched
 
           gh pr create --title "Pull Request from SeCode" --body "This Pull Request was created by SeCode GitHub Action"
+
+          stash pop || echo "No stash to pop."
