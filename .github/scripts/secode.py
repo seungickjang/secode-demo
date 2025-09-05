@@ -608,9 +608,9 @@ def sec_code_for_loop(
 
 
 def main(language):
-    upsert_tries_and_patched(1, False)
-    return
-
+    # upsert_tries_and_patched(1, False)
+    # return
+    
     codeql_report = vul_finder_codeQL(language=language)
     print("\nCode QL vul_finder: ", codeql_report)
 

@@ -66,7 +66,7 @@ jobs:
         run: |
           python .github/scripts/secode.py -l ${{ inputs.language }}
           echo "== SeCode Pipeline Results =="
-          cat pipeline.json
+          cat .cache/pipeline.json
 
       # - name: Upload pipeline.json
       #   uses: actions/upload-artifact@v4
