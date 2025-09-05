@@ -64,27 +64,29 @@ jobs:
           echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
           echo '{"tries": 0, "patched": false}' > pipeline.json
 
-      - name: Upload pipeline.json
+      - name: Upload pipeline.json if insecure
         uses: actions/upload-artifact@v4
         if: steps.sarifcount.outputs.count != '0'
         with:
           name: pipeline-json
           path: pipeline.json
 
-      - name: Commit SARIF and pipeline files
-        if: steps.sarifcount.outputs.count != '0'
+      - name: Configure git
         run: |
-          ls -l codeql-results
-          mkdir -p .cache
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Action"
+
+      - name: Commit SARIF and pipeline files if insecure
+        if: steps.sarifcount.outputs.count != '0'
+        run: |
+          mkdir -p .cache
 
           cp codeql-results/python.sarif .cache/
           cp pipeline.json .cache/
 
           git add -f .cache/python.sarif
           git add -f .cache/pipeline.json
-          
+
           git diff --cached --quiet || git commit -m "CodeQL Results"
           git push
         env:
@@ -92,7 +94,17 @@ jobs:
 
       - name: Secure -> Exit
         if: steps.sarifcount.outputs.count == '0'
-        run: echo "No CodeQL alerts. ✅ Secure."
+        run: |
+          echo "No CodeQL alerts. ✅ Secure."
+
+      - name: Remove SARIF and pipeline files if secure
+        if: steps.sarifcount.outputs.count == '0'
+        run: |
+          git rm -rf .cache || echo "No .cache to remove."
+          git diff --cached --quiet || git commit -m "Remove .cache"
+          git push
+        env:
+          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
 
   run-secode-pipeline:
     needs: analyze
