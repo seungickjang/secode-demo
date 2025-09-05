@@ -60,11 +60,14 @@ jobs:
       #     name: pipeline-json
       #     path: pipeline.json
 
+      - name: Pull latest main branch
+        run: |
+          git pull origin main
+
       - name: Set environment variables and run python
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
         run: |
-          git pull origin main
           python .github/scripts/secode.py -l ${{ inputs.language }}
           echo "== SeCode Pipeline Results =="
           cat .cache/pipeline.json
@@ -89,8 +92,6 @@ jobs:
       - name: Commit and push main.py to secode-patched
         if: steps.read.outputs.patched == 'true'
         run: |
-          echo ${{ steps.read.outputs.patched }}
-
           git config --local user.email "actions@github.com"
           git config --local user.name "SeCode Bot"
 
@@ -108,7 +109,7 @@ jobs:
             git switch -c secode-patched
           fi
 
-          cp .main.py src/main.py
+          mv -f .main.py src/main.py
 
           # Commit and push
           git add src/main.py

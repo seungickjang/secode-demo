@@ -279,7 +279,7 @@ def process_json_file(json_file_path):
 
     for filename, data in file_cwe_map.items():
         for cwe in data["cwes"]:
-            print(f"❌ Found CWE-{cwe}")
+            print(f"❌ Found {cwe}")
 
         summarized_data.append(
             {
