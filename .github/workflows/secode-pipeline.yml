@@ -51,7 +51,7 @@ jobs:
       - name: Download sarif file
         uses: actions/download-artifact@v4
         with:
-          name: codeql-results
+          name: codeql-sarif
           path: codeql-results/${{ inputs.language }}.sarif
 
       - name: Download pipeline.json 
