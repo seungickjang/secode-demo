@@ -1,3 +1,7 @@
+if __name__ == '__main__':
+    print("Hello, World!")
+
+'''
 from flask import Flask, request
 import math
 
@@ -13,3 +17,4 @@ def compute():
         return {'error': str(e)}
 if __name__ == '__main__':
     app.run(debug=True)
+'''
