@@ -82,7 +82,9 @@ jobs:
           cp codeql-results/python.sarif .cache/
           cp pipeline.json .cache/
 
-          git add .cache
+          git add -f .cache/python.sarif
+          git add -f .cache/pipeline.json
+          
           git diff --cached --quiet || git commit -m "CodeQL Results"
           git push
         env:
