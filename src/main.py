@@ -1,23 +1,19 @@
-try:
-    num1 = float("10")  # Initialize num1 with a valid string for compilation
-    num2 = float("20")  # Initialize num2 with a valid string for compilation
-except ValueError:
-    raise ValueError("Input values must be valid numbers.")
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
 
 def add_numbers(num1, num2):
-    if num1 is None or num1 == '':
-        raise ValueError("num1 cannot be None or empty")
-    if num2 is None or num2 == '':
-        raise ValueError("num2 cannot be None or empty")
+    if not is_float(num1) or not is_float(num2):
+        raise ValueError("Both inputs must be numbers or numeric strings.")
     
-    try:
-        num1 = float(num1)
-        num2 = float(num2)
-    except ValueError:
-        raise ValueError("Input values must be valid numbers.")
-    
-    return num1 + num2
+    return float(num1) + float(num2)
 
 # Example usage
-result = add_numbers("10", "20")
-print(result)  # Output: 30.0
+try:
+    result = add_numbers("3.14", "2.71")
+    print(f"The result is: {result}")
+except ValueError as e:
+    print(e)
