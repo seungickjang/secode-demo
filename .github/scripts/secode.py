@@ -14,7 +14,7 @@ import traceback
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 MODEL = "gpt-4o-mini"
-PIPELINE_PATH = Path("./pipeline.json")
+PIPELINE_PATH = Path("./.cache/pipeline.json")
 
 mitre_vulnerabilities = """
         1. CWE-787: Out-of-bounds Write
@@ -47,9 +47,9 @@ mitre_vulnerabilities = """
 
 def load_or_init_tries(path: Path = PIPELINE_PATH) -> int:
     """
-    Load ./pipeline.json and return its 'tries' value.
+    Load ./.cache/pipeline.json and return its 'tries' value.
     If the file or the 'tries' key is missing (or invalid), write {"tries": 0}
-    to ./pipeline.json and return 0.
+    to ./.cache/pipeline.json and return 0.
     """
     try:
         with path.open("r", encoding="utf-8") as f:
@@ -362,15 +362,15 @@ def compilable(task, language):
 
 def vul_finder_codeQL(language):
     try:
-        f = open(f"codeql-results/{language}.sarif", "rt", encoding="utf-8")
+        f = open(f".cache/{language}.sarif", "rt", encoding="utf-8")
         result = json.load(f)
         result["status"] = "success"
         result["type"] = language
-        with open(f"codeql-results/{language}.json", "wt", encoding="utf-8") as f:
+        with open(f".cache/{language}.json", "wt", encoding="utf-8") as f:
             f.write(json.dumps(result))
             f.close()
 
-        summarized_data = json_to_csv(f"codeql-results/{language}.json")
+        summarized_data = json_to_csv(f".cache/{language}.json")
         return formatresult(summarized_data)
 
     except Exception as e:
