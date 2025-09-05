@@ -64,7 +64,7 @@ jobs:
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
         run: |
-          git fetch origin
+          git pull origin main
           python .github/scripts/secode.py -l ${{ inputs.language }}
           echo "== SeCode Pipeline Results =="
           cat .cache/pipeline.json
