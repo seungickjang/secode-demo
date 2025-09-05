@@ -1,10 +1,11 @@
-import html
-
-def generate_response(result):
-    # Sanitize the output to prevent XSS
-    return html.escape(str(result))
-
-# Example usage
-if __name__ == "__main__":
-    user_input = "<script>alert('XSS');</script>"
-    print(generate_response(user_input))
+def add_numbers(num1, num2):
+    if num1 is None or num2 is None:
+        return "Invalid input: None values are not allowed."
+    
+    try:
+        num1 = float(num1)
+        num2 = float(num2)
+    except ValueError:
+        return "Invalid input: Please enter valid numbers."
+    
+    return num1 + num2
