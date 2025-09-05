@@ -1,7 +1,11 @@
-from html import escape
+import html
 
-def generate_response(user_input):
-    # Process user input
-    result = user_input  # Assume some processing happens here
-    # Escape the result to prevent XSS
-    return escape(str(result))
+def process_user_input(user_input):
+    # Process the user input here
+    result = user_input  # Example processing
+    return html.escape(str(result))  # Mitigated XSS vulnerability
+
+# Example usage
+if __name__ == "__main__":
+    user_input = "<script>alert('XSS');</script>"  # Simulated user input
+    print(process_user_input(user_input))
