@@ -1,16 +1,23 @@
-import html
+try:
+    num1 = float("10")  # Initialize num1 with a valid string for compilation
+    num2 = float("20")  # Initialize num2 with a valid string for compilation
+except ValueError:
+    raise ValueError("Input values must be valid numbers.")
 
 def add_numbers(num1, num2):
-    # Ensure inputs are integers
-    try:
-        num1 = int(num1)
-        num2 = int(num2)
-    except ValueError:
-        return "Invalid input. Please provide integers."
+    if num1 is None or num1 == '':
+        raise ValueError("num1 cannot be None or empty")
+    if num2 is None or num2 == '':
+        raise ValueError("num2 cannot be None or empty")
     
-    # Return the result after escaping it to prevent XSS
-    return html.escape(str(num1 + num2))
+    try:
+        num1 = float(num1)
+        num2 = float(num2)
+    except ValueError:
+        raise ValueError("Input values must be valid numbers.")
+    
+    return num1 + num2
 
 # Example usage
-if __name__ == "__main__":
-    print(add_numbers(5, 10))  # Output: 15
+result = add_numbers("10", "20")
+print(result)  # Output: 30.0
