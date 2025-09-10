@@ -1,0 +1,113 @@
+# moduleauthor:: Seung Jang <seung.jang@csiro.au>
+# date:: 2025-09-10
+# description:: SeCode Pipeline CodeQL Python Analysis Workflow
+
+name: CodeQL Python Analysis
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/main.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL Analyze (Python)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    outputs:
+      count: ${{ steps.sarifcount.outputs.count }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WRITE_TOKEN }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          output: codeql-results
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"  # or "3.10", etc.
+
+      - name: Display CWEs from SARIF
+        run: |
+          python .github/scripts/display_cwes.py -l python
+
+      - name: Count CodeQL results
+        id: sarifcount
+        run: |
+          total=0
+          for f in codeql-results/*.sarif; do
+            [ -f "$f" ] || continue
+            c=$(jq '[.runs[].results] | flatten | length' "$f")
+            total=$(( total + c ))
+          done
+          echo "count=$total" >> "$GITHUB_OUTPUT"
+      
+      - name: Insecure -> Create pipeline.json and run SeCode Pipeline
+        if: steps.sarifcount.outputs.count != '0'
+        run: |
+          echo "❌ Found ${{ steps.sarifcount.outputs.count }} issues."
+          echo '{"tries": 0, "patched": false}' > pipeline.json
+
+      - name: Configure git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit SARIF and pipeline files if insecure
+        if: steps.sarifcount.outputs.count != '0'
+        run: |
+          mkdir -p .cache
+
+          cp codeql-results/python.sarif .cache/
+          cp pipeline.json .cache/
+
+          git add -f .cache/python.sarif
+          git add -f .cache/pipeline.json
+
+          git diff --cached --quiet || git commit -m "CodeQL Results"
+          git push
+        env:
+          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+
+      - name: Secure -> Exit
+        if: steps.sarifcount.outputs.count == '0'
+        run: |
+          echo "No CodeQL alerts. ✅ Secure."
+
+      - name: Remove SARIF and pipeline files if secure
+        if: steps.sarifcount.outputs.count == '0'
+        run: |
+          git rm -rf .cache || echo "No .cache to remove."
+          git diff --cached --quiet || git commit -m "Remove .cache"
+          git push
+        env:
+          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+
+  run-secode-pipeline:
+    needs: analyze
+    if: fromJson(needs.analyze.outputs.count) > 0
+    uses: ./.github/workflows/secode-pipeline.yml
+    with:
+      language: "python"
+    secrets: inherit

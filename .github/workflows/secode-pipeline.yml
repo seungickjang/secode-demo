@@ -1,0 +1,171 @@
+# moduleauthor:: Seung Jang <seung.jang@csiro.au>
+# date:: 2025-09-10
+# description:: SeCode Pipeline Workflow
+
+name: Run SeCode Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+        default: "python"
+  workflow_dispatch:
+    inputs:
+      language:
+        description: 'Programming language (python or cpp)'
+        required: true
+        default: 'python'
+        type: choice
+        options:
+        - python
+        - cpp
+
+permissions:
+  contents: write
+  actions: read
+  security-events: write
+
+jobs:
+  run-secode-pipeline:
+    runs-on: ubuntu-latest
+    outputs:
+      patched: ${{ steps.read.outputs.patched }}
+      tries: ${{ steps.read.outputs.tries }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"  # or "3.10", etc.
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai pandas pycocoevalcap nltk transformers lexical-diversity torch textblob textstat
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      - name: Authenticate GitHub CLI
+        run: echo ${{ secrets.WRITE_TOKEN }} | gh auth login --with-token
+      
+      - name: Pull latest main branch
+        run: |
+          git pull origin main
+
+      - name: Set environment variables and run secode pipeline
+        env:
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
+        run: |
+          python .github/scripts/secode.py -l ${{ inputs.language }}
+          echo "== SeCode Pipeline Results =="
+          cat .cache/pipeline.json
+
+      - name: Read JSON
+        id: read
+        run: |
+          if [ ! -f .cache/pipeline.json ]; then
+            echo "patched=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          cat .cache/pipeline.json
+          patched=$(jq -r '.patched // false' .cache/pipeline.json)
+          tries=$(jq -r '.tries' .cache/pipeline.json)
+          echo "patched=${patched}" >> $GITHUB_OUTPUT
+          echo "tries=$tries" >> $GITHUB_OUTPUT
+
+      - name: Commit and push main to secode-patched
+        if: steps.read.outputs.patched == 'true'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Action"
+
+          git stash push -m "Stash pipeline.json" .cache/pipeline.json || echo "No changes to stash."
+
+          # Get the latest refs from origin
+          git fetch origin
+
+          # Switch to secode-patched (create or track it as needed)
+          if git show-ref --verify --quiet refs/heads/secode-patched; then
+            git switch secode-patched
+          elif git ls-remote --exit-code --heads origin secode-patched >/dev/null 2>&1; then
+            git switch -t origin/secode-patched
+          else
+            git switch -c secode-patched
+          fi
+
+          mv -f .main.* src/
+
+          # Commit and push
+          git add src/main.*
+          git commit -m "SeCode patched" || echo "No changes to commit."
+          git push -u origin secode-patched
+
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          create_pr() {
+            gh pr create --title "Pull Request from SeCode ($TIMESTAMP)" --body "This Pull Request was created by SeCode GitHub Action on "
+          }
+
+          if create_pr; then
+            echo "Pull request created successfully."
+            exit 0
+          fi
+
+          echo "PR create failed. Checking for an existing open PR from $HEAD -> $BASE ..."
+          EXISTING_PR="$(gh pr list --state open --base "$BASE" --head "$HEAD" --json number --jq '.[0].number' || true)"
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Closing existing PR #$EXISTING_PR ..."
+            gh pr close "$EXISTING_PR" --comment "Auto-closed by SeCode at $TIMESTAMP"
+          else
+            echo "No open PR found to close."
+          fi
+
+          # Try to create again from the same head
+          if create_pr; then
+            echo "PR created after closing the old one."
+            exit 0
+          fi
+
+          git stash pop || echo "No stash to pop."
+
+      - name: Update pipeline.json in main branch if not patched
+        if: steps.read.outputs.patched != 'true'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Action"
+
+          git switch main
+          git add -f .cache/pipeline.json
+          git commit -m "Update pipeline.json" || echo "No changes to commit."
+          git push origin main
+      
+      - name: Trigger Retry Workflow
+        if: steps.read.outputs.patched != 'true' && fromJson(steps.read.outputs.tries) < fromJson(vars.MAX_RETRIES)
+        run: |
+          echo "Language: ${{ inputs.language }}"
+          echo "Patched: ${{ steps.read.outputs.patched }}"
+          echo "Tries: ${{ steps.read.outputs.tries }}"
+          echo "Max Tries: ${{ vars.MAX_RETRIES }}"
+          echo "Triggering Retry Workflow..."
+
+          if [ "${{ inputs.language }}" == "python" ]; then
+            curl -s -X POST \
+              -H "Authorization: Bearer ${{ secrets.WRITE_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/seungickjang/secode-demo/actions/workflows/retry-python.yml/dispatches \
+              -d '{"ref":"main"}'  
+          elif [ "${{ inputs.language }}" == "cpp" ]; then
+            curl -s -X POST \
+              -H "Authorization: Bearer ${{ secrets.WRITE_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/seungickjang/secode-demo/actions/workflows/retry-cpp.yml/dispatches \
+              -d '{"ref":"main"}'  
+          fi
+
+          echo "🆗 Retry Workflow triggered."
+ 
