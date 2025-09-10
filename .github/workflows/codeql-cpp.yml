@@ -43,7 +43,7 @@ jobs:
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
-        with:
+        with:cpp
           languages: cpp
 
       - name: Build the project 
@@ -94,10 +94,10 @@ jobs:
         run: |
           mkdir -p .cache
 
-          cp codeql-results/python.sarif .cache/
+          cp codeql-results/cpp.sarif .cache/
           cp pipeline.json .cache/
 
-          git add -f .cache/python.sarif
+          git add -f .cache/cpp.sarif
           git add -f .cache/pipeline.json
 
           git diff --cached --quiet || git commit -m "CodeQL Results"
