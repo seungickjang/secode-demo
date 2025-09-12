@@ -99,7 +99,8 @@ jobs:
             git switch -c secode-patched
           fi
 
-          mv -f .main.* src/
+          mv -f .main.cpp src/main.cpp 2>/dev/null || true
+          mv -f .main.py src/main.py 2>/dev/null || true
 
           # Commit and push
           git add src/main.*
