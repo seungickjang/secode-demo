@@ -1,13 +1,18 @@
-def get_float_input(prompt):
-    while True:
-        user_input = input(prompt)
+def add_numbers(num1, num2):
+    if num1.replace('.', '', 1).isdigit() and num2.replace('.', '', 1).isdigit():
         try:
-            value = float(user_input)
-            if value < 0:  # Example of additional validation (e.g., non-negative numbers)
-                raise ValueError("Input must be a non-negative number.")
-            return value
-        except ValueError as e:
-            print(f"Invalid input: {e}. Please enter a valid number.")
+            float_num1 = float(num1)
+            float_num2 = float(num2)
+        except ValueError:
+            raise ValueError("Invalid input: Please enter valid numbers.")
+        
+        return float_num1 + float_num2
+    else:
+        raise ValueError("Invalid input: Please enter valid numbers.")
 
-num1 = get_float_input("Enter the first number: ")
-num2 = get_float_input("Enter the second number: ")
+# Example usage
+try:
+    result = add_numbers("10", "20")
+    print("The sum is:", result)
+except ValueError as e:
+    print(e)
